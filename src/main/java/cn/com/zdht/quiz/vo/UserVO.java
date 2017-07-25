@@ -1,0 +1,32 @@
+package cn.com.zdht.quiz.vo;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
+
+/**
+ * @author 袁臻
+ * 7/25/17
+ */
+@Getter
+@Setter
+@ApiModel
+public class UserVO {
+    @ApiModelProperty(value = "用户名", dataType = "字符串", required = true, example = "Mike")
+    @NotEmpty
+    @Length(min = 3, max = 10)
+    private String userName;
+
+    @ApiModelProperty(value = "电子邮件", dataType = "字符串", required = true, example = "mike@gmail.com")
+    @NotEmpty
+    @Length(min = 7, max = 50)
+    private String email;
+
+    @ApiModelProperty(value = "城市名称", dataType = "字符串", required = true, example = "北京")
+    @NotEmpty
+    @Length(min = 2, max = 10)
+    private String cityName;
+}
