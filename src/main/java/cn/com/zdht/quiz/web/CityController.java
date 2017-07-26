@@ -29,8 +29,12 @@ public class CityController {
     private CityRepository cityRepository;
 
     @GetMapping(value = "list")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "获取城市列表成功"), @ApiResponse(code = 404, message = "城市列表为空")})
-    @ApiOperation(value = "获取列表", tags = "城市", notes = "获取数据库中的城市列表。", response = DosserReturnBody.class)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "获取城市列表成功", response = CityVO.class),
+            @ApiResponse(code = 404, message = "城市列表为空", response = DosserReturnBody.class)})
+    @ApiOperation(value = "获取列表",
+            response = CityVO.class,
+            tags = "城市",
+            notes = "获取数据库中的城市列表，若列表不为空，响应200：获取城市列表成功；若列表为空，响应404：城市列表为空")
     public DosserReturnBody list() {
         /*
         curl -X GET --header 'Accept: application/json' 'http://localhost:8080/city/list'
@@ -48,14 +52,19 @@ public class CityController {
             List<CityVO> cityVOList = CityService.getVOListByEntityList(cityList);
             return new DosserReturnBodyBuilder()
                     .statusOk()
+                    .message("获取城市列表成功")
                     .collection(cityVOList)
                     .build();
         }
     }
 
     @PostMapping()
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建城市成功"), @ApiResponse(code = 400, message = "新建失败，已有同名城市")})
-    @ApiOperation(value = "新增", tags = "城市", notes = "若提交的城市不存在，则保存到数据库中；若已经存在，则不保存。", response = DosserReturnBody.class)
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建城市成功", response = String.class),
+            @ApiResponse(code = 400, message = "新建失败，已有同名城市", response = DosserReturnBody.class)})
+    @ApiOperation(value = "新增",
+            response = String.class,
+            tags = "城市",
+            notes = "若提交的城市不存在，则保存到数据库中；若已经存在，则不保存。")
     public DosserReturnBody create(@ApiParam(value = "城市DTO") @RequestBody final CityDTO cityDTO) {
         /*
         curl -X POST --header 'Content-Type: application/json' --header 'Accept: text/plain' -d '{"cityCode": 140100,"cityName": "太原市"}' 'http://localhost:8080/city'
