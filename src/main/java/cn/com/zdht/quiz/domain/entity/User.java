@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Table(name = "users", indexes = {@Index(name = "user_name_index", columnList = "user_name")})
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//https://stackoverflow.com/questions/29771730/postgres-error-in-batch-insert-relation-hibernate-sequence-does-not-exist-po
     private Integer id;
 
     @Column(name = "user_name", unique = true, nullable = false)
@@ -36,7 +36,7 @@ public class User {
     private City city;
 
     /**
-     * 空构造方法，必需
+     * 空构造方法
      */
     public User() {
     }
@@ -53,7 +53,3 @@ public class User {
         this.city = city;
     }
 }
-
-/*
-CREATE TABLE users(id integer PRIMARY KEY, user_name text UNIQUE NOT NULL,email text NOT NULL, password text NOT NULL, city_code integer NOT NULL);
- */

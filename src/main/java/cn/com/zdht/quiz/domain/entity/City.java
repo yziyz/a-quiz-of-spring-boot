@@ -26,7 +26,7 @@ public class City {
     private String cityName;
 
     /**
-     * 空构造方法，必需
+     * 空构造方法
      */
     public City() {
     }
