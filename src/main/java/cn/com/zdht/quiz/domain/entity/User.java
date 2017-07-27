@@ -2,13 +2,11 @@ package cn.com.zdht.quiz.domain.entity;
 
 import cn.com.zdht.quiz.common.util.HashUtil;
 import cn.com.zdht.quiz.dto.UserDTO;
-import com.google.common.hash.Hashing;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
