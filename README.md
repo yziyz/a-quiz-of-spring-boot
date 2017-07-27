@@ -18,7 +18,7 @@
 用户和城市的关联。
 
 ### 2.2 数据
-> 参考[数据文件](http://192.168.0.148:8056/yuanzhen/documents/raw/master/test.sql)，可下载后导入本地PostgreSQL数据库。
+> 参考[数据文件](https://github.com/yziyz/a-quiz-of-spring-boot/raw/master/src/main/resources/data.sql)，可下载后导入本地PostgreSQL数据库。
 
 #### 2.2.1 城市
 ##### 2.2.1.1 参考建表语句
