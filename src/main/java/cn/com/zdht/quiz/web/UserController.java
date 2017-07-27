@@ -40,7 +40,7 @@ public class UserController {
             tags = "用户",
             response = String.class,
             notes = "若不存在UserDTO中的用户名对应的用户且存在UserDTO的城市名称对应的城市，则新建，响应200：创建用户'{uuid}'成功；若存在，则相应400：创建失败，已有同名用户'{username}；若不存在城市，响应404：新建用户'{username}'失败，不存在城市'{cityname}'")
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建用户成功", response = String.class),
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建用户成功", response = UserVO.class),
             @ApiResponse(code = 400, message = "新建用户失败，已有同名用户", response = DosserReturnBody.class),
             @ApiResponse(code = 404, message = "新建用户失败，不存在城市", response = DosserReturnBody.class)})
     public DosserReturnBody create(@ApiParam(value = "用户DTO", required = true) @RequestBody final UserDTO userDTO) {
@@ -60,6 +60,7 @@ public class UserController {
                 User user = new User(userDTO, cityRepository.getByCityName(userDTO.getCityName()));
                 userRepository.save(user);
                 return new DosserReturnBodyBuilder()
+                        .collectionItem(new UserVO(user))
                         .statusCreated()
                         .message(String.format("新建用户'%s'成功", user.getUuid()))
                         .build();
@@ -78,13 +79,10 @@ public class UserController {
             tags = "用户",
             response = String.class,
             notes = "若存在路径参数对应的用户，则删除，响应200：删除用户'{uuid}'成功；若不存在该用户名，响应404：删除用户失败，不存在用户'{uuid}'")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "删除用户成功", response = String.class),
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "删除用户成功"),
             @ApiResponse(code = 404, message = "删除用户失败，不存在该用户", response = DosserReturnBody.class)})
     public DosserReturnBody delete(@ApiParam(value = "需要删除的用户的UUID", required = true)
                                    @PathVariable("uuid") final String uuid) {
-        /*
-        curl -X DELETE --header 'Accept: application/json' 'http://localhost:8005/users/0cdc1980-316d-49ea-9443-7059b2e88469'
-         */
         log.info(String.format("请求删除：%s", uuid));
         //检验用户名是否存在
         if (userRepository.existByUuid(uuid)) {
@@ -113,9 +111,6 @@ public class UserController {
             @ApiResponse(code = 403, message = "更新失败，已有同名用户", response = DosserReturnBody.class)})
     public DosserReturnBody update(@ApiParam(value = "需要更新的用户的UUID", required = true) @PathVariable("uuid") final String uuid,
                                    @ApiParam(value = "目的用户DTO", required = true) @RequestBody final UserDTO userDTO) {
-        /*
-        curl -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"cityName": "天津市", "email": "mike%40gmail.com", "password": "sasasas", "userName": "Mike"}' 'http://localhost:8005/users/6b26a804-2286-4423-b325-bcaeda5fbc7c'
-         */
         log.info(String.format("请求更新：%s", uuid));
         //检验用户名是否存在
         if (userRepository.existByUuid(uuid)) {
@@ -139,6 +134,7 @@ public class UserController {
             }
             userRepository.save(user);
             return new DosserReturnBodyBuilder()
+                    .collectionItem(new UserVO(user))
                     .statusOk()
                     .message(String.format("更新用户'%s'成功", uuid))
                     .build();
