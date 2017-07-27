@@ -154,9 +154,6 @@ public class UserController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "获取用户成功", response = UserVO.class),
             @ApiResponse(code = 404, message = "获取用户失败，不存在用户", response = DosserReturnBody.class)})
     public DosserReturnBody get(@ApiParam(value = "需要获取的用户的UUID", required = true) @PathVariable("uuid") final String uuid) {
-        /*
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/users/6b26a804-2286-4423-b325-bcaeda5fbc7c'
-         */
         log.info(String.format("请求获取：%s", uuid));
         //检验UUID对应的用户是否存在
         if (userRepository.existByUuid(uuid)) {
