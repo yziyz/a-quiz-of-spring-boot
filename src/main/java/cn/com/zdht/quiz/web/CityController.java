@@ -2,6 +2,7 @@ package cn.com.zdht.quiz.web;
 
 import cn.com.zdht.pavilion.message.dosser.DosserReturnBody;
 import cn.com.zdht.pavilion.message.dosser.DosserReturnBodyBuilder;
+import cn.com.zdht.quiz.common.constant.CityControllerConstant;
 import cn.com.zdht.quiz.domain.CityRepository;
 import cn.com.zdht.quiz.domain.entity.City;
 import cn.com.zdht.quiz.dto.CityDTO;
@@ -22,7 +23,7 @@ import java.util.List;
  * 7/25/17
  */
 @RestController
-@RequestMapping(value = "city")
+@RequestMapping(value = CityControllerConstant.URL)
 @Slf4j
 public class CityController {
     @Autowired
@@ -37,7 +38,7 @@ public class CityController {
             notes = "获取数据库中的城市列表，若列表不为空，响应200：获取城市列表成功；若列表为空，响应404：城市列表为空")
     public DosserReturnBody list() {
         /*
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8080/city/list'
+        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/cities/list'
          */
         log.info("请求获取列表");
         List<City> cityList = (List<City>) cityRepository.findAll();
@@ -67,7 +68,7 @@ public class CityController {
             notes = "若提交的城市不存在，则保存到数据库中；若已经存在，则不保存。")
     public DosserReturnBody create(@ApiParam(value = "城市DTO") @RequestBody final CityDTO cityDTO) {
         /*
-        curl -X POST --header 'Content-Type: application/json' --header 'Accept: text/plain' -d '{"cityCode": 140100,"cityName": "太原市"}' 'http://localhost:8080/city'
+        curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"cityCode": 110000, "cityName": "北京市"}' 'http://localhost:8005/cities'
          */
         log.info(String.format("请求新建：%d %s", cityDTO.getCityCode(), cityDTO.getCityName()));
         if (!cityRepository.exists(cityDTO.getCityCode())) {

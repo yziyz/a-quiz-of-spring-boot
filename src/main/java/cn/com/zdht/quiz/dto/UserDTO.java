@@ -19,7 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class UserDTO {
     @ApiModelProperty(value = "用户名", dataType = "字符串", required = true, example = "Mike", notes = "不能与已存在的用户名相同")
     @NotEmpty
-    @Length(min = 3, max = 10)
+    @Length(min = 3, max = 240)
     private String userName;
 
     @ApiModelProperty(value = "电子邮箱", dataType = "字符串", required = true, example = "mike@gmail.com")

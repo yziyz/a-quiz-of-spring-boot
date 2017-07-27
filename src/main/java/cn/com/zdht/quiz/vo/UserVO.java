@@ -19,6 +19,11 @@ import org.springframework.beans.BeanUtils;
 @ToString
 @ApiModel
 public class UserVO {
+    @ApiModelProperty(value = "用户UUID", dataType = "字符串", required = true, example = "376c700a-acc0-4e9b-b170-f21853cfa95f")
+    @NotEmpty
+    @Length(min = 36, max = 36)
+    private String uuid;
+
     @ApiModelProperty(value = "用户名", dataType = "字符串", required = true, example = "Mike")
     @NotEmpty
     @Length(min = 3, max = 10)
@@ -29,7 +34,7 @@ public class UserVO {
     @Length(min = 7, max = 50)
     private String email;
 
-    @ApiModelProperty(value = "城市名称", dataType = "字符串", required = true, example = "北京")
+    @ApiModelProperty(value = "城市名称", dataType = "字符串", required = true, example = "北京市")
     @NotEmpty
     @Length(min = 2, max = 10)
     private String cityName;

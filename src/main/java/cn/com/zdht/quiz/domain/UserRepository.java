@@ -16,6 +16,7 @@ import java.util.List;
 public interface UserRepository extends CrudRepository<User, Integer> {
     /**
      * 查询用户名中含有指定关键字的用户
+     *
      * @param keyword 关键字
      * @return 含有关键字的用户
      */
@@ -23,38 +24,60 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     List<User> searchByUserName(@Param("keyword") final String keyword);
 
     /**
-     * 由指定的用户名获取对象
-     * @param userName 指定的用户名
-     * @return 指定的用户名对应的用户对象
+     * 获取指定UUID对应的用户
+     *
+     * @param uuid 指定的UUID
+     * @return 指定UUID对应的用户
      */
-    User getByUserName(final String userName);
+    User getByUuid(@Param("uuid") final String uuid);
 
     /**
-     * 查询指定的用户名userName是否存在
+     * 根据指定的城市名称关键词查询用户
+     *
+     * @param keyword 指定的城市名称关键词
+     * @return 用户城市名称匹配关键词的用户
+     */
+    @Query(value = "SELECT id, uuid, user_name, email, password, users.city_code FROM users, cities WHERE users.city_code = cities.city_code AND cities.city_name LIKE '%' || :keyWord || '%'",
+            nativeQuery = true)
+    List<User> searchByCityName(@Param("keyWord") final String keyword);
+
+    /**
+     * 查询指定的用户名是否存在
      * 参考：https://stackoverflow.com/questions/7471625/fastest-check-if-row-exists-in-postgresql
      *
-     * @param userName 指定的用户名userName
+     * @param userName 指定的用户名
      * @return 若存在，返回true，否则返回false
      */
     @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE user_name = :userName LIMIT 1)", nativeQuery = true)
     boolean existByUserName(@Param("userName") final String userName);
 
     /**
-     * 排除用户名excludedName的前提下，查询指定的用户名userName是否存在
-     * @param userName 指定的用户名userName
-     * @param excludedName 需要排除的用户名excludedName
+     * 查询指定的用户UUID是否存在
+     *
+     * @param uuid 指定的用户UUID
      * @return 若存在，返回true，否则返回false
      */
-    @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE user_name = :userName AND user_name != :excludedName LIMIT 1)", nativeQuery = true)
-    boolean existByUserNameAndExcludedName(@Param("userName") final String userName,
-                                           @Param("excludedName") final String excludedName);
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE uuid = :uuid LIMIT 1)", nativeQuery = true)
+    boolean existByUuid(@Param("uuid") final String uuid);
+
+    /**
+     * 排除uuid对应的用户名的前提下，查询指定的用户名userName是否存在
+     *
+     * @param userName 指定的用户名userName
+     * @param uuid     需要排除的用户uuid
+     * @return 若存在，返回true，否则返回false
+     */
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE user_name = :userName AND uuid != :uuid LIMIT 1)",
+            nativeQuery = true)
+    boolean existByUserNameAndExcludedUuid(@Param("userName") final String userName,
+                                           @Param("uuid") final String uuid);
 
     /**
      * 删除指定用户名对应的用户
      *
-     * @param userName 指定用户名
+     * @param uuid 指定UUID
      */
     @Transactional
     @Modifying
-    void deleteByUserName(final String userName);
+    void deleteByUuid(final String uuid);
 }
