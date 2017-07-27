@@ -70,7 +70,7 @@ public class UserController {
     @ApiOperation(value = "新建",
             tags = "用户",
             response = String.class,
-            notes = "若不存在UserDTO中的用户名对应的用户且存在UserDTO的城市名称对应的城市，则新建，响应200：创建用户'{uuid}'成功；若存在，则相应400：创建失败，已有同名用户'{username}；若不存在城市，响应404：新建用户'{username}'失败，不存在城市'{cityname}''")
+            notes = "若不存在UserDTO中的用户名对应的用户且存在UserDTO的城市名称对应的城市，则新建，响应200：创建用户'{uuid}'成功；若存在，则相应400：创建失败，已有同名用户'{username}；若不存在城市，响应404：新建用户'{username}'失败，不存在城市'{cityname}'")
     @ApiResponses(value = {@ApiResponse(code = 201, message = "新建用户成功", response = String.class),
             @ApiResponse(code = 400, message = "新建用户失败，已有同名用户", response = DosserReturnBody.class),
             @ApiResponse(code = 404, message = "新建用户失败，不存在城市", response = DosserReturnBody.class)})
