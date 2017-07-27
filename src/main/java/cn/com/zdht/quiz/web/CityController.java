@@ -29,7 +29,7 @@ public class CityController {
     @Autowired
     private CityRepository cityRepository;
 
-    @GetMapping(value = "list")
+    @GetMapping(value = "all")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "获取城市列表成功", response = CityVO.class),
             @ApiResponse(code = 404, message = "城市列表为空", response = DosserReturnBody.class)})
     @ApiOperation(value = "获取列表",
@@ -38,7 +38,7 @@ public class CityController {
             notes = "获取数据库中的城市列表，若列表不为空，响应200：获取城市列表成功；若列表为空，响应404：城市列表为空")
     public DosserReturnBody list() {
         /*
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/cities/list'
+        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/cities/all'
          */
         log.info("请求获取列表");
         List<City> cityList = (List<City>) cityRepository.findAll();
