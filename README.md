@@ -5,7 +5,7 @@
 ### 1.1 概述
 * 命名规范
 * 目录规范
-* RESTful API设计规范
+* RESTful API设计规范([参考](http://www.ruanyifeng.com/blog/2014/05/restful_api.html))
 * Spring Boot/Swagger/Lombok
 * 数据库索引
 * 代码规范
