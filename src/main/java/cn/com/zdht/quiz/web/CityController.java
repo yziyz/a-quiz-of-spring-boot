@@ -60,7 +60,7 @@ public class CityController {
     }
 
     @PostMapping()
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建城市成功", response = String.class),
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "新建城市成功", response = CityVO.class),
             @ApiResponse(code = 400, message = "新建失败，已有同名城市", response = DosserReturnBody.class)})
     @ApiOperation(value = "新增",
             response = String.class,
@@ -75,6 +75,7 @@ public class CityController {
             City city = new City(cityDTO);
             cityRepository.save(city);
             return new DosserReturnBodyBuilder()
+                    .collectionItem(new CityVO(city))
                     .statusOk()
                     .message(String.format("新建城市'%s'成功", cityDTO.getCityName()))
                     .build();
