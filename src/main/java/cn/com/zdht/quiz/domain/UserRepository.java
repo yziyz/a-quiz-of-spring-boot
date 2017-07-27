@@ -32,7 +32,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     User getByUuid(@Param("uuid") final String uuid);
 
     /**
-     * 根据指定的城市名称关键词查询用户
+     * 查询匹配指定的城市名称关键词的用户
      *
      * @param keyword 指定的城市名称关键词
      * @return 用户城市名称匹配关键词的用户

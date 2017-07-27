@@ -70,9 +70,10 @@ public class UserController {
     @ApiOperation(value = "新建",
             tags = "用户",
             response = String.class,
-            notes = "若不存在UserDTO中的用户名对应的用户，则新建，响应200：创建用户'{uuid}'成功；若存在，则相应400：创建失败，已有同名用户'{uuid}'")
+            notes = "若不存在UserDTO中的用户名对应的用户且存在UserDTO的城市名称对应的城市，则新建，响应200：创建用户'{uuid}'成功；若存在，则相应400：创建失败，已有同名用户'{username}；若不存在城市，响应404：新建用户'{username}'失败，不存在城市'{cityname}''")
     @ApiResponses(value = {@ApiResponse(code = 201, message = "新建用户成功", response = String.class),
-            @ApiResponse(code = 400, message = "新建用户失败，已存在该用户", response = DosserReturnBody.class)})
+            @ApiResponse(code = 400, message = "新建用户失败，已有同名用户", response = DosserReturnBody.class),
+            @ApiResponse(code = 404, message = "新建用户失败，不存在城市", response = DosserReturnBody.class)})
     public DosserReturnBody create(@ApiParam(value = "用户DTO", required = true) @RequestBody final UserDTO userDTO) {
         /*
         curl -X POST --header 'Content-Type: application/json' --header 'Accept: text/plain' -d '{"cityName": "天津市", "email": "jay%40gmail.com", "password": "1234sdfghj", "userName": "Jay" }' 'http://localhost:8080/user'
@@ -86,13 +87,23 @@ public class UserController {
                     .message(String.format("新建用户失败，已有同名用户'%s'", userDTO.getUserName()))
                     .build();
         } else {
-            //不存在，保存到数据库中
-            User user = new User(userDTO, cityRepository.getByCityName(userDTO.getCityName()));
-            userRepository.save(user);
-            return new DosserReturnBodyBuilder()
-                    .statusCreated()
-                    .message(String.format("新建用户'%s'成功", userDTO.getUserName()))
-                    .build();
+            //不存在
+            //检验用户DTO中城市是否存在
+            if (cityRepository.existByCityName(userDTO.getCityName())) {
+                //存在该城市，保存到数据库中
+                User user = new User(userDTO, cityRepository.getByCityName(userDTO.getCityName()));
+                userRepository.save(user);
+                return new DosserReturnBodyBuilder()
+                        .statusCreated()
+                        .message(String.format("新建用户'%s'成功", user.getUuid()))
+                        .build();
+            } else {
+                //不存在该城市
+                return new DosserReturnBodyBuilder()
+                        .statusBadRequest()
+                        .message(String.format("新建用户'%s'失败，不存在城市'%s'", userDTO.getUserName(), userDTO.getCityName()))
+                        .build();
+            }
         }
     }
 
