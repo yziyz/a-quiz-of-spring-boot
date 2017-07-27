@@ -76,7 +76,7 @@ public class UserController {
             @ApiResponse(code = 404, message = "新建用户失败，不存在城市", response = DosserReturnBody.class)})
     public DosserReturnBody create(@ApiParam(value = "用户DTO", required = true) @RequestBody final UserDTO userDTO) {
         /*
-        curl -X POST --header 'Content-Type: application/json' --header 'Accept: text/plain' -d '{"cityName": "天津市", "email": "jay%40gmail.com", "password": "1234sdfghj", "userName": "Jay" }' 'http://localhost:8080/user'
+        curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"cityName": "天津市", "email": "jay%40gmail.com", "password": "oiuytre", "userName": "Jay"}' 'http://yziyz.xin:8005/users'
          */
         log.info(String.format("请求新建：%s", userDTO.getUserName()));
         //检验用户名是否存在
