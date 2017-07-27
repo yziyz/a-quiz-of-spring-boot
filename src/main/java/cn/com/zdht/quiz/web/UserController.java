@@ -35,37 +35,6 @@ public class UserController {
     @Autowired
     private CityRepository cityRepository;
 
-    @GetMapping(value = "all")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "获取用户列表成功", response = UserVO.class),
-            @ApiResponse(code = 404, message = "用户列表为空", response = DosserReturnBody.class)})
-    @ApiOperation(value = "获取列表",
-            tags = "用户",
-            response = UserVO.class,
-            notes = "获取数据库中的用户列表，若结果数量不为0,则响应200：获取用户列表成功；若结果数量为0,则响应404：用户列表为空")
-    public DosserReturnBody list() {
-        /*
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8080/user/all'
-         */
-        log.info("请求获取用户列表");
-        List<User> userList = (List<User>) userRepository.findAll();
-        //判断列表是否长度为0
-        if (userList.size() == 0) {
-            //长度为0
-            return new DosserReturnBodyBuilder()
-                    .statusNotFound()
-                    .message("用户列表为空")
-                    .build();
-        } else {
-            //长度不为0
-            List<UserVO> userVOList = UserService.getVOListByEntityList(userList);
-            return new DosserReturnBodyBuilder()
-                    .collection(userVOList)
-                    .statusOk()
-                    .message("获取用户列表成功")
-                    .build();
-        }
-    }
-
     @PostMapping
     @ApiOperation(value = "新建",
             tags = "用户",
@@ -75,9 +44,6 @@ public class UserController {
             @ApiResponse(code = 400, message = "新建用户失败，已有同名用户", response = DosserReturnBody.class),
             @ApiResponse(code = 404, message = "新建用户失败，不存在城市", response = DosserReturnBody.class)})
     public DosserReturnBody create(@ApiParam(value = "用户DTO", required = true) @RequestBody final UserDTO userDTO) {
-        /*
-        curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"cityName": "天津市", "email": "jay%40gmail.com", "password": "oiuytre", "userName": "Jay"}' 'http://yziyz.xin:8005/users'
-         */
         log.info(String.format("请求新建：%s", userDTO.getUserName()));
         //检验用户名是否存在
         if (userRepository.existByUserName(userDTO.getUserName())) {
@@ -217,42 +183,41 @@ public class UserController {
     @ApiOperation(value = "查询",
             tags = "用户",
             response = UserVO.class,
-            notes = "根据提供的关键词类型，若没有关键词类型（type）指定，则查询关键词（keyword）匹配用户名和城市名称；若指定关键词类型，则根据指定的关键词查询；查询后返回匹配的用户列表，若查询结果列表长度为0，相应404：没有匹配的用户；若不为0,则响应200：查询用户成功")
+            notes = "根据提供的关键词类型，若两个参数否都为空，响应200：查询用户成功；若没有关键词类型（type）指定，则查询关键词（keyword）匹配用户名和城市名称；若指定关键词类型，则根据指定的关键词查询；查询后返回匹配的用户列表，若查询结果列表长度为0，相应404：没有匹配的用户；若不为0,则响应200：查询用户成功")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "查询用户成功", response = UserVO.class),
             @ApiResponse(code = 404, message = "没有匹配的用户", response = String.class)})
-    public DosserReturnBody search(@ApiParam(value = "需要查询的关键词", required = true)
-                                   @RequestParam("keyword") final String keyword,
+    public DosserReturnBody search(@ApiParam(value = "需要查询的关键词")
+                                   @RequestParam(value = "keyword", required = false) final String keyword,
                                    @ApiParam(value = "关键词类型", allowableValues = "cityName, userName")
                                    @RequestParam(value = "type", required = false) final String type) {
-        /*
-        有type参数：
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/users?keyword=%E5%A4%A9&type=cityName'
-        无type参数：
-        curl -X GET --header 'Accept: application/json' 'http://localhost:8005/users?keyword=%E5%A4%A9'
-         */
         log.info(String.format("请求查询，关键词'%s'，类型'%s'", keyword, type));
         //因为结果需要排重，所以使用Set存放查询结果
         Set<User> userSet = new HashSet<>(0);
-
-        //首先判断关键词是否为空
-        if (Objects.equals(null, type)) {
-            //关键词为空，则使用关键词在用户名和城市名中检索
-            userSet.addAll(userRepository.searchByCityName(keyword));
-            userSet.addAll(userRepository.searchByUserName(keyword));
+        //判断关键词是否为空
+        if (Objects.equals(null, keyword)) {
+            //关键词为空，返回所有用户
+            userSet.addAll((List<User>) userRepository.findAll());
         } else {
-            //关键词不为空
-            if (Objects.equals(UserControllerConstant.CITY_NAME, type)) {
-                //关键词为城市名的情况
+            //关键词不为空，判断关键词类型是否为空
+            if (Objects.equals(null, type)) {
+                //关键词为空，则使用关键词在用户名和城市名中检索
                 userSet.addAll(userRepository.searchByCityName(keyword));
-            } else if (Objects.equals(UserControllerConstant.USER_NAME, type)) {
-                //关键词类型为用户名的情况
                 userSet.addAll(userRepository.searchByUserName(keyword));
             } else {
-                //关键词类型不是用户名和城市名的情况
-                return new DosserReturnBodyBuilder()
-                        .statusNotFound()
-                        .message("类型参数错误，可选项为\"cityName\"或\"userName\"")
-                        .build();
+                //关键词不为空
+                if (Objects.equals(UserControllerConstant.CITY_NAME, type)) {
+                    //关键词为城市名的情况
+                    userSet.addAll(userRepository.searchByCityName(keyword));
+                } else if (Objects.equals(UserControllerConstant.USER_NAME, type)) {
+                    //关键词类型为用户名的情况
+                    userSet.addAll(userRepository.searchByUserName(keyword));
+                } else {
+                    //关键词类型不是用户名和城市名的情况
+                    return new DosserReturnBodyBuilder()
+                            .statusNotFound()
+                            .message("类型参数错误，可选项为\"cityName\"或\"userName\"")
+                            .build();
+                }
             }
         }
 
