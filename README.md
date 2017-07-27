@@ -2,11 +2,16 @@
 > 时间：2017年7月
 
 ## 1 知识点
+### 1.1 概述
 * 命名规范
 * 目录规范
 * RESTful API设计规范
 * Spring Boot/Swagger/Lombok
 * 数据库索引
+* 代码规范
+### 1.2 必需
+* 代码简化：Lombok的@Getter/@Setter/@ToString/@Slf4j注解
+* API文档：Swagger的@ApiResponses/@ApiResponse/@ApiOperation/@ApiModel/@ApiParam注解
 
 ## 2 项目信息
 ### 2.1 概述
