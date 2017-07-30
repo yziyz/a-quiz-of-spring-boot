@@ -24,9 +24,9 @@
 ##### 2.2.1.1 参考建表语句
 ```
 #新建城市表
-CREATE TABLE cities (city_code integer PRIMARY KEY,city_name text NOT NULL);
+CREATE TABLE city (city_code integer PRIMARY KEY,city_name text NOT NULL);
 #新建城市名称索引
-CREATE INDEX CONCURRENTLY cities_city_name_index ON cities (city_name);
+CREATE INDEX CONCURRENTLY idx_city_name ON city (city_name);
 ```
 
 ##### 2.2.1.2 数据来源
@@ -36,7 +36,7 @@ CREATE INDEX CONCURRENTLY cities_city_name_index ON cities (city_name);
 ##### 2.2.2.1 参考建表语句
 ```
 #新建用户表
-CREATE TABLE users(id BIGSERIAL, uuid varchar(36) PRIMARY KEY, user_name varchar(240) NOT NULL, email varchar(50) NOT NULL, password varchar(96) NOT NULL, city_code integer REFERENCES cities (city_code) NOT NULL);
+CREATE TABLE user(id BIGSERIAL, uuid varchar(36) PRIMARY KEY, user_name varchar(240) NOT NULL, email varchar(50) NOT NULL, password varchar(96) NOT NULL, city_code integer REFERENCES city (city_code) NOT NULL, created_time date_time NOT NULL, updated_time date_time NOT NULL);
 #新建UUID索引
 CREATE INDEX CONCURRENTLY users_uuid_index ON users USING hash (uuid);
 #新建用户名索引

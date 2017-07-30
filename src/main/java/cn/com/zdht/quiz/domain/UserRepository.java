@@ -1,9 +1,11 @@
 package cn.com.zdht.quiz.domain;
 
 import cn.com.zdht.quiz.domain.entity.User;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +15,7 @@ import java.util.List;
  * @author 袁臻
  * 7/25/17
  */
-public interface UserRepository extends CrudRepository<User, Integer> {
+public interface UserRepository extends PagingAndSortingRepository<User, Integer>, JpaSpecificationExecutor<User> {
     /**
      * 查询用户名中含有指定关键字的用户
      *
@@ -22,6 +24,9 @@ public interface UserRepository extends CrudRepository<User, Integer> {
      */
     @Query(value = "SELECT * FROM users WHERE user_name LIKE '%' || :keyword || '%'", nativeQuery = true)
     List<User> searchByUserName(@Param("keyword") final String keyword);
+
+
+    List<User> findByUserNameLike(    String userName);
 
     /**
      * 获取指定UUID对应的用户
@@ -37,7 +42,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
      * @param keyword 指定的城市名称关键词
      * @return 用户城市名称匹配关键词的用户
      */
-    @Query(value = "SELECT id, uuid, user_name, email, password, users.city_code FROM users, cities WHERE users.city_code = cities.city_code AND cities.city_name LIKE '%' || :keyWord || '%'",
+    @Query(value = "SELECT id, uuid, user_name, email, password, user.city_code FROM users, cities WHERE user.city_code = cities.city_code AND cities.city_name LIKE '%' || :keyWord || '%'",
             nativeQuery = true)
     List<User> searchByCityName(@Param("keyWord") final String keyword);
 
@@ -50,6 +55,8 @@ public interface UserRepository extends CrudRepository<User, Integer> {
      */
     @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE user_name = :userName LIMIT 1)", nativeQuery = true)
     boolean existByUserName(@Param("userName") final String userName);
+
+    int countByUserName(String userName);
 
     /**
      * 查询指定的用户UUID是否存在

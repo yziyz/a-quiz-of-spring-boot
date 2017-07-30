@@ -2,22 +2,35 @@ package cn.com.zdht.quiz.web;
 
 import cn.com.zdht.pavilion.message.dosser.DosserReturnBody;
 import cn.com.zdht.pavilion.message.dosser.DosserReturnBodyBuilder;
+import cn.com.zdht.pavilion.util.PredicateListBuilder;
 import cn.com.zdht.quiz.common.constant.UserControllerConstant;
 import cn.com.zdht.quiz.common.util.HashUtil;
 import cn.com.zdht.quiz.domain.CityRepository;
 import cn.com.zdht.quiz.domain.UserRepository;
+import cn.com.zdht.quiz.domain.entity.City;
 import cn.com.zdht.quiz.domain.entity.User;
 import cn.com.zdht.quiz.dto.UserDTO;
+import cn.com.zdht.quiz.dto.UserIndexDTO;
 import cn.com.zdht.quiz.service.UserService;
 import cn.com.zdht.quiz.vo.UserVO;
+import com.sun.tracing.dtrace.Attributes;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.*;
 import java.util.*;
 
 /**
@@ -179,57 +192,39 @@ public class UserController {
             notes = "根据提供的关键词类型，若两个参数否都为空，响应200：查询用户成功；若没有关键词类型（type）指定，则查询关键词（keyword）匹配用户名和城市名称；若指定关键词类型，则根据指定的关键词查询；查询后返回匹配的用户列表，若查询结果列表长度为0，相应404：没有匹配的用户；若不为0,则响应200：查询用户成功")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "查询用户成功", response = UserVO.class),
             @ApiResponse(code = 404, message = "没有匹配的用户", response = String.class)})
-    public DosserReturnBody search(@ApiParam(value = "需要查询的关键词")
-                                   @RequestParam(value = "keyword", required = false) final String keyword,
-                                   @ApiParam(value = "关键词类型", allowableValues = "cityName, userName")
-                                   @RequestParam(value = "type", required = false) final String type) {
-        log.info(String.format("请求查询，关键词'%s'，类型'%s'", keyword, type));
+    public DosserReturnBody search(@ModelAttribute UserIndexDTO indexDTO) {
         //因为结果需要排重，所以使用Set存放查询结果
         Set<User> userSet = new HashSet<>(0);
-        //判断关键词是否为空
-        if (Objects.equals(null, keyword)) {
-            //关键词为空，返回所有用户
-            userSet.addAll((List<User>) userRepository.findAll());
-        } else {
-            //关键词不为空，判断关键词类型是否为空
-            if (Objects.equals(null, type)) {
-                //关键词为空，则使用关键词在用户名和城市名中检索
-                userSet.addAll(userRepository.searchByCityName(keyword));
-                userSet.addAll(userRepository.searchByUserName(keyword));
-            } else {
-                //关键词不为空
-                if (Objects.equals(UserControllerConstant.CITY_NAME, type)) {
-                    //关键词为城市名的情况
-                    userSet.addAll(userRepository.searchByCityName(keyword));
-                } else if (Objects.equals(UserControllerConstant.USER_NAME, type)) {
-                    //关键词类型为用户名的情况
-                    userSet.addAll(userRepository.searchByUserName(keyword));
-                } else {
-                    //关键词类型不是用户名和城市名的情况
-                    return new DosserReturnBodyBuilder()
-                            .statusNotFound()
-                            .message("类型参数错误，可选项为\"cityName\"或\"userName\"")
-                            .build();
-                }
-            }
-        }
+        Page<User> userPage = userRepository.findAll(new Specification<User>() {
+            @Override
+            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
 
-        //判断查询结果列表长度是否为0
-        if (userSet.size() == 0) {
-            //长度为0
-            return new DosserReturnBodyBuilder()
-                    .statusNotFound()
-                    .message("没有匹配的用户")
-                    .build();
-        } else {
-            //长度不为0
-            List<User> userList = new ArrayList<>(userSet);
-            List<UserVO> userVOList = UserService.getVOListByEntityList(userList);
-            return new DosserReturnBodyBuilder()
-                    .collection(userVOList)
-                    .statusOk()
-                    .message("查询用户成功")
-                    .build();
-        }
+                Join<User, City> userCityJoin = root.join("city", JoinType.LEFT);
+                PredicateListBuilder builder = new PredicateListBuilder();
+                if (!StringUtils.isEmpty(indexDTO.getUserName())) {
+                    builder.add(
+                            cb.equal(root.get("userName"), indexDTO.getUserName())
+                    );
+
+                }
+
+                if (!StringUtils.isEmpty(indexDTO.getCityName())) {
+                    builder.add(
+                            cb.equal(userCityJoin.get("cityName"), indexDTO.getCityName())
+                    );
+
+                }
+
+                return cb.and(builder.toArray());
+            }
+        }, new PageRequest(indexDTO.getPage()-1, indexDTO.getSize(), new Sort(Sort.Direction.DESC, "userName")));
+
+        List<UserVO> userVOList = UserService.getVOListByEntityList(userPage.getContent());
+        return new DosserReturnBodyBuilder()
+                .statusOk()
+                .message("查询用户成功")
+                .collection(userVOList)
+                //.paginate(page,size,userPage.getTotalElements())
+                .build();
     }
 }
