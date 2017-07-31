@@ -13,7 +13,6 @@ import cn.com.zdht.quiz.dto.UserDTO;
 import cn.com.zdht.quiz.dto.UserIndexDTO;
 import cn.com.zdht.quiz.service.UserService;
 import cn.com.zdht.quiz.vo.UserVO;
-import com.sun.tracing.dtrace.Attributes;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -23,15 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.criteria.*;
-import javax.persistence.metamodel.*;
-import java.util.*;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author 袁臻
@@ -193,31 +190,22 @@ public class UserController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "查询用户成功", response = UserVO.class),
             @ApiResponse(code = 404, message = "没有匹配的用户", response = String.class)})
     public DosserReturnBody search(@ModelAttribute UserIndexDTO indexDTO) {
-        //因为结果需要排重，所以使用Set存放查询结果
-        Set<User> userSet = new HashSet<>(0);
-        Page<User> userPage = userRepository.findAll(new Specification<User>() {
-            @Override
-            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-
-                Join<User, City> userCityJoin = root.join("city", JoinType.LEFT);
-                PredicateListBuilder builder = new PredicateListBuilder();
-                if (!StringUtils.isEmpty(indexDTO.getUserName())) {
-                    builder.add(
-                            cb.equal(root.get("userName"), indexDTO.getUserName())
-                    );
-
-                }
-
-                if (!StringUtils.isEmpty(indexDTO.getCityName())) {
-                    builder.add(
-                            cb.equal(userCityJoin.get("cityName"), indexDTO.getCityName())
-                    );
-
-                }
-
-                return cb.and(builder.toArray());
+        log.info(String.format("请求查询: %s", indexDTO.toString()));
+        Page<User> userPage = userRepository.findAll((root, criteriaQuery, cb) -> {
+            Join<User, City> userCityJoin = root.join("city", JoinType.LEFT);
+            PredicateListBuilder builder = new PredicateListBuilder();
+            if (!StringUtils.isEmpty(indexDTO.getUserName())) {
+                builder.add(
+                        cb.equal(root.get("userName"), indexDTO.getUserName())
+                );
             }
-        }, new PageRequest(indexDTO.getPage()-1, indexDTO.getSize(), new Sort(Sort.Direction.DESC, "userName")));
+            if (!StringUtils.isEmpty(indexDTO.getCityName())) {
+                builder.add(
+                        cb.equal(userCityJoin.get("cityName"), indexDTO.getCityName())
+                );
+            }
+            return cb.and(builder.toArray());
+        }, new PageRequest(indexDTO.getPage() - 1, indexDTO.getSize(), new Sort(Sort.Direction.DESC, "userName")));
 
         List<UserVO> userVOList = UserService.getVOListByEntityList(userPage.getContent());
         return new DosserReturnBodyBuilder()
