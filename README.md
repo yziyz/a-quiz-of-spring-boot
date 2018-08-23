@@ -1,10 +1,6 @@
 # 测验项目
 > 时间：2017年7月
 
-- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `#f03c15`
-- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `#c5f015`
-- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `#1589F0`
-
 ## 1 知识点
 ### 1.1 概述
 * 命名规范
@@ -22,7 +18,7 @@
 用户和城市的关联。
 
 ### 2.2 数据
-> 参考[数据文件](https://github.com/yziyz/a-quiz-of-spring-boot/raw/master/src/main/resources/data.sql)，可下载后在PostgreSQL新建名为"test"的数据库，导入本地即可。
+> 参考[数据文件](https://github.com/zenuo/a-quiz-of-spring-boot/raw/master/src/main/resources/data.sql)，可下载后在PostgreSQL新建名为"test"的数据库，导入本地即可。
 
 #### 2.2.1 城市
 ##### 2.2.1.1 参考建表语句
@@ -98,5 +94,3 @@ CREATE INDEX CONCURRENTLY users_password_index ON users USING hash (password);
 |获取单个|GET|/users/{uuid}|uuid：用户UUID(路径参数，必须)|若存在用户名对应的用户，响应200：获取用户成功；若不存在用户，响应404：不存在用户'{uuid}'|若存在UUID对应用户，响应该用户VO对象和执行状态；若不存在，只响应执行状态|curl -X GET --header 'Accept: application/json' 'http://yziyz.xin:8005/users/6b26a804-2286-4423-b325-bcaeda5fbc7c'|
 |查询|GET|/users|keyword：关键词（查询参数，必须）；type：关键词类型（查询参数，非必须）|根据提供的关键词类型，若两个参数否都为空，响应200：获取全部用户列表成功；若没有关键词类型（type）指定，则查询关键词（keyword）匹配用户名和城市名称；若指定关键词类型，则根据指定的关键词查询；查询后返回匹配的用户列表，若查询结果列表长度为0，相应404：没有匹配的用户；若不为0,则响应200：查询用户成功|若存在匹配用户，响应该用户VO对象和执行状态；若不存在，只响应执行状态|无参数：curl -X GET --header 'Accept: application/json' 'http://localhost:8005/users' 有type参数：curl -X GET --header 'Accept: application/json' 'http://yziyz.xin:8005/users?keyword=%E5%A4%A9&type=cityName' 无type参数：curl -X GET --header 'Accept: application/json' 'http://yziyz.xin:8005/users?keyword=%E5%A4%A9'|
 
-### 2.5 示例Swagger UI
-http://yziyz.xin:8005/swagger-ui.html
